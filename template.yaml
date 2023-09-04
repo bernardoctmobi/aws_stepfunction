@@ -22,7 +22,7 @@ Resources:
     Properties:
       CodeUri: src/
       Handler: app.lambdaHandler
-      Role: !GetAtt [LambdaExecutionRole, Arn]
+      Role: !GetAtt LambdaExecutionRole.Arn
       Runtime: nodejs18.x
       Architectures:
         - x86_64
@@ -49,19 +49,13 @@ Resources:
                 Resource: "*"
 
   StateMachine:
-    Type: AWS::StepFunctions::StateMachine
+    Type: AWS::Serverless::StateMachine
     Properties:
-      RoleArn: !GetAtt [StatesExecutionRole, Arn]
-      DefinitionString: !Sub
-        - |-
-          {
-            "StartAt": "State1",
-            "States": {
-              "State1": {
-                "Type": "Task",
-                "Resource": "${lambdaArn}",
-                "End": true
-              }
-            }
-          }
-        - { lambdaArn: !GetAtt [Function, Arn] }
+      Role: !GetAtt StatesExecutionRole.Arn
+      Definition:
+        StartAt: State1
+        States:
+          State1:
+            Type: Task
+            Resource: !GetAtt Function.Arn
+            End: true
